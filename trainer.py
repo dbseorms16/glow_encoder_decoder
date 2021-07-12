@@ -46,25 +46,11 @@ class Trainer():
         timer_data, timer_model = utility.timer(), utility.timer()
         for batch, (lr, hr, _) in enumerate(self.loader_train):
             lr, hr = self.prepare(lr, hr)
-            print(hr.size())
-            print(lr.size())
-            
-            # flip train
-            # flip_lr = copy.deepcopy(lr)
 
-            # for i in range(0,len(flip_lr)):
-            #     for j in range(0, len(flip_lr[i])):
-            #         for k in range(0, len(flip_lr[i][j])):
-            #             flip_lr[i][j][k]= torch.fliplr(flip_lr[i][j][k])
-            
-        
             timer_data.hold()
             timer_model.tic()
             
             self.optimizer.zero_grad()
-
-            for i in range(len(self.dual_optimizers)):
-                self.dual_optimizers[i].zero_grad()
 
             # forward
            
@@ -221,8 +207,8 @@ class Trainer():
         device = torch.device('cpu' if self.opt.cpu else 'cuda')
 
         if len(args) > 1:
-            return [a.to(device) for a in args[0]], args[-1].to(device)
-        return [a.to(device) for a in args[0]],
+            return args[0], args[-1].to(device)
+        return args[0]
 
     def terminate(self):
         if self.opt.test_only:

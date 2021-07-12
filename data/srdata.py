@@ -24,14 +24,11 @@ class SRData(data.Dataset):
     
     def __getitem__(self, idx):
         lr, hr, filename = self._load_file(idx)
-
-        lr, hr = self.get_patch(lr, hr)
         lr, hr = common.set_channel(lr, hr, n_channels=self.args.n_colors)
         
         lr_tensor, hr_tensor = common.np2Tensor(
             lr, hr, rgb_range=self.args.rgb_range
         )
-
 
         return lr_tensor, hr_tensor, filename
 
@@ -79,29 +76,13 @@ class SRData(data.Dataset):
     def _load_file(self, idx):
         idx = self._get_index(idx)
         f_hr = self.images_hr[idx]
-        f_lr = [self.images_lr[idx_scale][idx] for idx_scale in range(len(self.scale))]
-
+        f_lr = self.images_lr[idx]
 
         filename, _ = os.path.splitext(os.path.basename(f_hr))
         hr = imageio.imread(f_hr)
-        lr = [imageio.imread(f_lr[idx_scale]) for idx_scale in range(len(self.scale))]
+        lr = imageio.imread(f_lr)
         return lr, hr, filename
 
     def get_patch(self, lr, hr):
-        scale = self.scale
-        multi_scale = len(self.scale) > 1
-        if self.train:
-            if isinstance(lr, list):
-                ih, iw = lr[0].shape[:2]
-            else:
-                ih, iw = lr.shape[:2]
-            hr = hr[0:ih * scale[0], 0:iw * scale[0]]
-        else:
-            if isinstance(lr, list):
-                ih, iw = lr[0].shape[:2]
-            else:
-                ih, iw = lr.shape[:2]
-            hr = hr[0:ih * scale[0], 0:iw * scale[0]]
-            
         return lr, hr
 

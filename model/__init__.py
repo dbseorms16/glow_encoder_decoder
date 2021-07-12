@@ -115,34 +115,11 @@ class Model(nn.Module):
             kwargs = {'map_location': lambda storage, loc: storage}
         else:
             kwargs = {}
-        #### load primal model ####
-
-        weight4 = torch.load(pre_train, **kwargs)
-       
-
-        print(weight4['up_blocks.0.0.body.0.weight'])
-        print(weight4['up_blocks.1.0.body.0.weight'])
-
-        # print(weight4['P2W.0.bias'].requires_grad)
-        # metasr = torch.load(pre_train_metasr, **kwargs)[0]
-        # p2w = []
-        # for param in metasr:
-        #     paramsplit = param.split('.')
-        #     if paramsplit == 'P2W':
-        #         p2w.append(param)
-
-        # p2weight={}
-        # for p2 in p2w:
-        #     p2weight[p2] = metasr[0][p2]
-            # p2weight.update(metasr[p2])
-        # new.update(p2weight)
-
-        # param.requires_grad = False  
 
         if pre_train != '.':
             print('Loading model from {}'.format(pre_train))
             self.get_model().load_state_dict(
-                weight4,
+                pre_train,
                 strict=False
             )
         #### load dual model ####

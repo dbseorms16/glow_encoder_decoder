@@ -16,7 +16,7 @@ def get_patch(*args, patch_size=96, scale=[2], multi_scale=False):
     tx, ty = tx- tx % scale[0], ty - ty % scale[0]
     ix, iy = [ tx // s for s in scale], [ty // s for s in scale]
    
-    lr = [args[0][i][iy[i]:iy[i] + ip[i], ix[i]:ix[i] + ip[i], :] for i in range(len(scale))]
+    lr = args[-1][ty:ty + tp, tx:tx + tp, :]
     hr = args[-1][ty:ty + tp, tx:tx + tp, :]
 
     return [lr, hr]
@@ -34,7 +34,7 @@ def set_channel(*args, n_channels=3):
 
         return img
 
-    return [_set_channel(a) for a in args[0]], _set_channel(args[-1])
+    return _set_channel(args[-2]) , _set_channel(args[-1])
 
 
 def np2Tensor(*args, rgb_range=255):
@@ -45,7 +45,7 @@ def np2Tensor(*args, rgb_range=255):
 
         return tensor
 
-    return [_np2Tensor(a) for a in args[0]], _np2Tensor(args[1])
+    return  _np2Tensor(args[0]), _np2Tensor(args[1])
 
 
 def augment(*args, hflip=True, rot=True):
@@ -60,5 +60,5 @@ def augment(*args, hflip=True, rot=True):
         
         return img
 
-    return [_augment(a) for a in args[0]], _augment(args[-1])
+    return _augment(args[0]), _augment(args[-1])
 
