@@ -32026,3 +32026,14 @@ DRN(
 )]
 The number of parameters is 0.79M
 [Epoch 1]	Learning rate: 1.00e-4
+Glow_Encoder_Decoder()
+Glow_Encoder_Decoder()
+Glow_Encoder_Decoder()
+Glow_Encoder_Decoder(
+  (head): Conv2d(3, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+)
+[Epoch 1]	Learning rate: 1.00e-4
+Glow_Encoder_Decoder(
+  (head): Conv2d(3, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+)
+[Epoch 1]	Learning rate: 1.00e-4

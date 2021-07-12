@@ -102,21 +102,6 @@ def make_optimizer(opt, my_model):
     
     return optimizer_function(trainable, **kwargs)
 
-
-def make_dual_optimizer(opt, dual_models):
-    dual_optimizers = []
-    for dual_model in dual_models:
-        temp_dual_optim = torch.optim.Adam(
-            params=dual_model.parameters(),
-            lr = opt.lr, 
-            betas = (opt.beta1, opt.beta2),
-            eps = opt.epsilon,
-            weight_decay=opt.weight_decay)
-        dual_optimizers.append(temp_dual_optim)
-    
-    return dual_optimizers
-
-
 def make_scheduler(opt, my_optimizer):
     scheduler = lrs.CosineAnnealingLR(
         my_optimizer,
@@ -125,46 +110,6 @@ def make_scheduler(opt, my_optimizer):
     )
 
     return scheduler
-
-
-def make_dual_scheduler(opt, dual_optimizers):
-    dual_scheduler = []
-    for i in range(len(dual_optimizers)):
-        scheduler = lrs.CosineAnnealingLR(
-            dual_optimizers[i],
-            float(opt.epochs),
-            eta_min=opt.eta_min
-        )
-        dual_scheduler.append(scheduler)
-
-    return dual_scheduler
-
-
-def init_model(args):
-    # Set the templates here
-    if args.model.find('DRN-S') >= 0:
-        if args.scale == 4:
-            args.n_blocks = 30
-            args.n_feats = 16
-        elif args.scale == 8:
-            args.n_blocks = 30
-            args.n_feats = 8
-        else:
-            print('Use defaults n_blocks and n_feats.')
-        args.dual = True
-
-    if args.model.find('DRN-L') >= 0:
-        if args.scale == 4:
-            args.n_blocks = 40
-            args.n_feats = 8
-        elif args.scale == 8:
-            args.n_blocks = 36
-            args.n_feats = 10
-        else:
-            print('Use defaults n_blocks and n_feats.')
-        args.dual = True
-
-
 
 # -*- coding: utf-8 -*-
 """

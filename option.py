@@ -86,8 +86,6 @@ parser.add_argument('--share_idx', type=int, default=0,
 
 args = parser.parse_args()
 
-utility.init_model(args)
-
 # scale = [2,4] for 4x SR to load data
 # scale = [2,4,8] for 8x SR to load data
 if (args.scale & (args.scale -1)) ==0:

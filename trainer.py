@@ -25,9 +25,6 @@ class Trainer():
         self.loss = my_loss
         self.optimizer = utility.make_optimizer(opt, self.model)
         self.scheduler = utility.make_scheduler(opt, self.optimizer)
-        self.dual_models = self.model.dual_models
-        self.dual_optimizers = utility.make_dual_optimizer(opt, self.dual_models)
-        self.dual_scheduler = utility.make_dual_scheduler(opt, self.dual_optimizers)
         self.error_last = 1e8
 
     def train(self):
@@ -65,42 +62,18 @@ class Trainer():
             #             flip_sr[i][j][k] = torch.fliplr(flip_sr[i][j][k])
             # fflip_sr = flip_sr
 
-            
-            sr2lr = []
-            for i in range(len(self.dual_models)):
-                sr2lr_i = self.dual_models[i](sr[i - len(self.dual_models)])
-                sr2lr.append(sr2lr_i)
-
                 
             # compute primary loss
             loss_primary = self.loss(sr[-1], hr)
             for i in range(1, len(sr)):
                 loss_primary += self.loss(sr[i - 1 - len(sr)], lr[i - len(sr)])
             
-            # compute dual loss
-            loss_dual = self.loss(sr2lr[0], lr[0])
-            for i in range(1, len(self.scale)):
-                loss_dual += self.loss(sr2lr[i], lr[i])
-
-            # compute average loss
-            # average_feat =(sr[-1]+fflip_sr[-1])/2
-            # loss_average = self.loss(average_feat, hr)
-
-            
-
-            #copute flip loss
-            loss_flip =0
-            # for i in range(0, len(sr)):
-            #     loss_flip+= self.loss(sr[i], fflip_sr[i])
-
             # compute total loss
-            loss =  loss_primary+ self.opt.dual_weight * loss_dual
+            loss =  loss_primary
             
             if loss.item() < self.opt.skip_threshold * self.error_last:
                 loss.backward()                
                 self.optimizer.step()
-                for i in range(len(self.dual_optimizers)):
-                    self.dual_optimizers[i].step()
             else:
                 print('Skip this batch {}! (Loss: {})'.format(
                     batch + 1, loss.item()
@@ -200,8 +173,6 @@ class Trainer():
 
     def step(self):
         self.scheduler.step()
-        for i in range(len(self.dual_scheduler)):
-            self.dual_scheduler[i].step()
 
     def prepare(self, *args):
         device = torch.device('cpu' if self.opt.cpu else 'cuda')
