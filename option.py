@@ -75,8 +75,6 @@ parser.add_argument('--print_every', type=int, default=100,
                     help='how many batches to wait before logging training status')
 parser.add_argument('--save_results', action='store_true',
                     help='save output results')
-parser.add_argument('--ratio', type=int, default=4,
-                    help='save output results')
 parser.add_argument('--weight_share', type=str, default='.',
                     help='sharing weights')
 parser.add_argument('--R', type=int, default=0,

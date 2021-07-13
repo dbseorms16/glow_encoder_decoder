@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 
+import imageio
 
 import utility
 from decimal import Decimal
@@ -31,10 +32,7 @@ class Trainer():
         epoch = self.scheduler.last_epoch + 1
         lr = self.scheduler.get_lr()[0]
 
-
         self.ckp.set_epoch(epoch)
-
-
         self.ckp.write_log(
             '[Epoch {}]\tLearning rate: {:.2e}'.format(epoch, Decimal(lr))
         )
@@ -43,30 +41,20 @@ class Trainer():
         timer_data, timer_model = utility.timer(), utility.timer()
         for batch, (lr, hr, _) in enumerate(self.loader_train):
             lr, hr = self.prepare(lr, hr)
-
             timer_data.hold()
             timer_model.tic()
             
             self.optimizer.zero_grad()
 
             # forward
-           
-            sr = self.model(lr[0])
-
-            # flip train
-            # flip_sr = self.model(flip_lr[0])
-
-            # for i in range(0, len(flip_sr)):
-            #     for j in range(0, len(flip_sr[i])):
-            #         for k in range(0, len(flip_sr[i][j])):
-            #             flip_sr[i][j][k] = torch.fliplr(flip_sr[i][j][k])
-            # fflip_sr = flip_sr
-
-                
+            sr = self.model(lr.cuda())
             # compute primary loss
-            loss_primary = self.loss(sr[-1], hr)
-            for i in range(1, len(sr)):
-                loss_primary += self.loss(sr[i - 1 - len(sr)], lr[i - len(sr)])
+            loss_primary = self.loss(sr, hr)
+
+            # sr = utility.quantize(sr, self.opt.rgb_range).to('cuda:0')
+            # normalized = sr[0].data.mul(255 / self.opt.rgb_range)
+            # ndarr = normalized.byte().permute(1, 2, 0).cpu().numpy()
+            # imageio.imwrite('./SR/sr{}.jpg'.format(batch), ndarr)
             
             # compute total loss
             loss =  loss_primary
@@ -105,7 +93,6 @@ class Trainer():
         with torch.no_grad():
             scale = max(self.scale)
             for si, s in enumerate([scale]):
-                f= open('5060_flip o.txt', 'w')
                 eval_psnr = 0
                 eval_simm =0
                 tqdm_test = tqdm(self.loader_test, ncols=80)
@@ -117,8 +104,7 @@ class Trainer():
                     else:
                         lr, = self.prepare(lr)
 
-                    sr = self.model(lr[0])
-                    if isinstance(sr, list): sr = sr[-1]
+                    sr = self.model(lr.cuda())
 
                     sr = utility.quantize(sr, self.opt.rgb_range)
 
@@ -158,19 +144,7 @@ class Trainer():
         )  
         if not self.opt.test_only:
             self.ckp.save(self, epoch, is_best=(best[1][0] + 1 == epoch))
-        '''
-        Each 10 Epoch 마다 up_block weight를 얻어내기 위한 작업
-        (trainer.py, checkpoint.py, (model)__init__.py)
-        print(best)
-        epo = int(best[1][0])+1
-        print(epo)
-        if (epo%10) == 0:
-            print("=====================================")
-            print("Save Up block 0th weight (epoch : %d)"%epo)
-            print("=====================================")
-            self.ckp.up_block_save(self, epo)
-        '''
-
+     
     def step(self):
         self.scheduler.step()
 
@@ -179,7 +153,7 @@ class Trainer():
 
         if len(args) > 1:
             return args[0], args[-1].to(device)
-        return args[0]
+        return args[0].to(device)
 
     def terminate(self):
         if self.opt.test_only:
