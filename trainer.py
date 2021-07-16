@@ -49,6 +49,8 @@ class Trainer():
             # forward
             sr = self.model(lr.cuda())
             # compute primary loss
+            #loss 변경
+            #loss 변경
             loss_primary = self.loss(sr, hr)
 
             # sr = utility.quantize(sr, self.opt.rgb_range).to('cuda:0')
