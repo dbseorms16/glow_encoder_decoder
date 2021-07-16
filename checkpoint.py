@@ -56,21 +56,6 @@ class Checkpoint():
             trainer.optimizer.state_dict(),
             os.path.join(self.dir, 'optimizer.pt')
         )
-        # dual save
-        dual_optimizers = {}
-        for i in range(len(trainer.dual_optimizers)):
-            dual_optimizers[i] = trainer.dual_optimizers[i]
-        torch.save(
-            dual_optimizers,
-            os.path.join(self.dir, 'dual_optimizers.pt')
-        )
-    """
-    Each 10 Epoch 마다 up_block weight를 얻어내기 위한 작업
-    (trainer.py, checkpoint.py, (model)__init__.py)
-    def up_block_save(self, trainer, epoch):
-        # Weight saved here!
-        trainer.model.up_block_save(self.dir, epoch)
-    """
 
     def add_log(self, log):
         self.log = torch.cat([self.log, log])
